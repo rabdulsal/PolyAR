@@ -1,0 +1,29 @@
+{
+  "name": "my-new-project",
+  "main": "node_modules/expo/AppEntry.js",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "eject": "expo eject",
+    "test": "node ./node_modules/jest/bin/jest.js --watchAll"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "@expo/samples": "2.1.1",
+    "eslint-config-rallycoding": "^3.2.0",
+    "expo": "29.0.0",
+    "expo-graphics": "^1.0.0-alpha.2",
+    "expo-three": "^3.0.0-alpha.4",
+    "react": "16.3.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-29.0.0.tar.gz",
+    "react-navigation": "^2.9.3",
+    "three": "^0.95.0"
+  },
+  "devDependencies": {
+    "jest-expo": "29.0.0"
+  }
+}
