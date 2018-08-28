@@ -16,6 +16,7 @@
     "@expo/samples": "2.1.1",
     "eslint-config-rallycoding": "^3.2.0",
     "expo": "29.0.0",
+    "expo-asset-utils": "0.0.5",
     "expo-graphics": "^1.0.0-alpha.2",
     "expo-three": "^3.0.0-alpha.4",
     "react": "16.3.1",
