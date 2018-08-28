@@ -1,3 +1,3 @@
 module.exports = {
-  GooglePoly: ''
+  GooglePoly: 'AIzaSyCljWKc-poTNbx5ae0ZIRIUmnCLvv4RoZw'
 };
