@@ -18,7 +18,6 @@ export default class GooglePoly {
       url += `&keywords=${encodedKeywords}`;
     }
     if (nextPageToken) { url += `&pageToken=${nextPageToken}`; }
-    console.log(`URL: ${url}`);
     return url;
   }
 
@@ -32,7 +31,6 @@ export default class GooglePoly {
     const url = GooglePoly.getQueryURL(this.apiKey, this.keywords, this.nextPageToken);
 
     return fetch(url).then((response) => {
-      console.log(`Response: ${response}`);
       return response.json();
     }).then(function (data) {
       this.currentResults = this.currentResults.concat(data.assets);

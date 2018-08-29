@@ -90,9 +90,13 @@ export default class HomeScreen extends Component {
           onChangeText={this.onSearchChangeText}
         />
         <Button title="Search" onPress={this.onSearchPress} />
-        <Button title="Load More" onPress={this.onLoadMorePress} />
-
         {this.renderCurrentResults()}
+        {
+          (this.state.currentResults.length === 0)
+          ? <View />
+          : <Button title="Load More" onPress={this.onLoadMorePress} />
+        }
+        <View style={{ paddingTop: 40 }} />
       </ScrollView>
       // <CustomARObject />
     );
