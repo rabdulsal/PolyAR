@@ -13,13 +13,13 @@ export default class GooglePolyAsset extends Component {
 
   static defaultProps = {
     asset: { },
-    onPress: () => { }
+    onPress: (asset) => { }
   }
 
   render() {
     return (
       <TouchableOpacity
-        onPress={this.props.onPress}
+        onPress={() => this.props.onPress(this.props.asset)}
         style={styles.container}
       >
         <Image

@@ -5,12 +5,16 @@ import {
   Button,
   TextInput,
   Image,
-  ScrollView
+  ScrollView,
+  Modal
 } from 'react-native';
+import Expo from 'expo';
+import ExpoTHREE, { THREE } from 'expo-three';
+import ExpoGraphics from 'expo-graphics';
 import CustomARObject from '../components/AppComponents/CustomARObject';
 import GooglePoly from './../api/GooglePoly';
 import ApiKeys from './../constants/ApiKeys';
-import { GooglePolyAsset } from '../components/AppComponents';
+import { SearchableGooglePolyAssetList } from '../components/AppComponents';
 import TurkeyObject from './../assets/objects/TurkeyObject.json';
 
 export default class HomeScreen extends Component {
@@ -19,86 +23,86 @@ export default class HomeScreen extends Component {
     super(props);
 
     this.googlePoly = new GooglePoly(ApiKeys.GooglePoly);
-    this.googlePoly.getSearchResults('duck', '').then((assets) => {
-      const json = JSON.stringify(assets[0]);
-    });
-
     this.state = {
-      searchQuery: '',
-      currentResults: [],
+      searchModalVisible: false,
+      currentAsset: TurkeyObject,
     };
   }
 
-  onSearchChangeText = (text) => {
-    this.setState({ searchQuery: text });
-  }
-
-  onSearchPress = () => {
-    const keyword = this.state.searchQuery;
-    this.googlePoly.setSearchParams(keyword);
-    this.googlePoly.getSearchResults().then(function (assets) {
-      this.setState({ currentResults: this.googlePoly.currentResults });
-    }.bind(this));
-  }
-
-  onLoadMorePress = () => {
-    this.googlePoly.getSearchResults().then(function (assets) {
-      console.log(assets);
-      this.setState({ currentResults: this.googlePoly.currentResults });
-    }.bind(this));
-  }
-
-  renderCurrentResults() {
-    if (this.state.currentResults.length === 0) {
-      return (
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text>No results</Text>
-        </View>
-      );
+  onRender = (delta) => {
+    if (this.turkey) {
+      this.turkey.rotation.x += 2 * delta;
+      this.turkey.rotation.y += 1.5 * delta;
     }
+  }
 
-    const results = [];
-    const resultsCount = this.state.currentResults.length;
-    for (let i = 0; i < resultsCount; i++) {
-      if (i === resultsCount - 1) {
-        results.push(<GooglePolyAsset asset={this.state.currentResults[i]} key={i} />);
-        break;
-      }
-      const rowKey = `row_${i}`;
-      const nextResult = this.state.currentResults[i + 1];
-      results.push(
-        <View style={{ flexDirection: 'row' }} key={rowKey}>
-          <GooglePolyAsset asset={this.state.currentResults[i]} key={i} />
-          <GooglePolyAsset asset={nextResult} key={nextResult} />
-        </View>
-      );
+  onAddObjectPress = () => {
+    // Remove the current object...
+    this.onRemoveObjectPress();
+
+    // Add the current object...
+    GooglePoly.getThreeModel(this.state.currentAsset, function (object) {
+      this.threeModel = object;
+      ExpoTHREE.utils.scaleLongestSideToSize(object, 0.75);
+      object.position.z = -3;
+      this.scene.add(object);
+    }.bind(this), function (error) {
+      console.log(error);
+    });
+  }
+
+  onRemoveObjectPress = () => {
+    if (this.threeModel) {
+      this.scene.remove(this.threeModel);
     }
-    return (
-      <View style={{ flex: 1, alignItems: 'center' }}>
-        {results}
-      </View>
-    );
+  }
+
+  onCancelPress = () => {
+    this.setState({
+      searchModalVisible: false
+    });
+  }
+
+  onAssetPress = (asset) => {
+    this.setState({
+      currentAsset: asset
+    });
+    this.setState({
+      searchModalVisible: false
+    });
+  }
+
+  onSearchModalPress = () => {
+    this.setState({
+      searchModalVisible: true
+    });
   }
 
   render() {
     return (
-      <ScrollView style={{ paddingTop: 20 }}>
-        <TextInput
-          style={{ borderWidth: 1, height: 40 }}
-          placeholder="Search..."
-          value={this.state.searchQuery}
-          onChangeText={this.onSearchChangeText}
-        />
-        <Button title="Search" onPress={this.onSearchPress} />
-        {this.renderCurrentResults()}
-        {
-          (this.state.currentResults.length === 0)
-          ? <View />
-          : <Button title="Load More" onPress={this.onLoadMorePress} />
-        }
-        <View style={{ paddingTop: 40 }} />
-      </ScrollView>
       // <CustomARObject />
+      <View style={{ flex: 1 }}>
+        <Button title="Add Object" onPress={this.onAddObjectPress} />
+        <Button title="Search" onPress={this.onSearchModalPress} />
+
+        <Modal visible={this.state.searchModalVisible} animationType="slide">
+          <SearchableGooglePolyAssetList
+            googlePoly={this.googlePoly}
+            onCancelPress={this.onCancelPress}
+            onAssetPress={this.onAssetPress}
+          />
+        </Modal>
+      </View>
     );
   }
 }
+
+const styles = {
+  textInputStyle: {
+    borderWidth: 1,
+    height: 40,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10
+  }
+};

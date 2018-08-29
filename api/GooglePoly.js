@@ -1,3 +1,9 @@
+import ExpoTHREE from 'expo-three';
+import AssetUtils from 'expo-asset-utils';
+import * as THREE from 'three';
+require("./../util/OBJLoader");
+require("./../util/MTLLoader");
+
 export default class GooglePoly {
 
   constructor(apiKey) {
@@ -37,5 +43,49 @@ export default class GooglePoly {
       this.nextPageToken = data.nextPageToken;
       return Promise.resolve(data.assets);
     }.bind(this));
+  }
+
+  // Returns a Three.js object
+  static getThreeModel(objectData, success, failure) {
+    if (!success) { success = function() { }; }
+    if (!failure) { failure = function() { }; }
+    if (!objectData) { failure("objectData is null"); return; }
+
+    // Search for a format...
+    const format = objectData.formats.find(format => { return format.formatType == "OBJ"; });
+    if (format === undefined) { failure("No format found"); return; }
+
+    // Search for a resource...
+    const obj = format.root;
+    const mtl = format.resources.find(resource => { return resource.url.endsWith("mtl"); });
+    const tex = format.resources.find(resource => { return resource.url.endsWith("png"); });
+    const path = obj.url.slice(0, obj.url.indexOf(obj.relativePath));
+
+    // Load the MTL...
+    var loader = new THREE.MTLLoader();
+    loader.setCrossOrigin(true);
+    loader.setTexturePath(path);
+    loader.load(mtl.url, function(materials) {
+
+        // Load the OBJ...
+        loader = new THREE.OBJLoader();
+        loader.setMaterials(materials);
+        loader.load(obj.url, async function(object) {
+
+            // If there is a texture, apply it...
+            if (tex !== undefined) {
+                const texUri = await AssetUtils.uriAsync(tex.url);
+                const texture = new THREE.MeshBasicMaterial({ map: await ExpoTHREE.loadAsync(texUri) });
+                object.traverse((child) => {
+                    if (child instanceof THREE.Mesh) {
+                        child.material = texture;
+                    }
+                });
+            }
+
+            // Return the object...
+            success(object);
+        });
+    });
   }
 }
