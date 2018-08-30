@@ -13,11 +13,14 @@ import ExpoGraphics from 'expo-graphics';
 import { AR, Asset, Permissions } from 'expo';
 import ExpoTHREE, { AR as ThreeAR, THREE } from 'expo-three';
 import { MaterialCommunityIcons as Icon } from 'react-native-vector-icons';
-import CustomARObject from '../components/AppComponents/CustomARObject';
 import GooglePoly from './../api/GooglePoly';
 import ApiKeys from './../constants/ApiKeys';
-import { SearchableGooglePolyAssetList } from '../components/AppComponents';
+import {
+  SearchableGooglePolyAssetList,
+  CustomARObject
+} from '../components/AppComponents';
 import TurkeyObject from './../assets/objects/TurkeyObject.json';
+
 
 console.disableYellowBox = true;
 
@@ -33,13 +36,13 @@ export default class HomeScreen extends Component {
     };
   }
 
-  onContextCreate = async ({ gl, scale: pixelRatio, width, height }) => {
+  onContextCreate = async ({ gl, scale, width, height }) => {
     // Initializer renderer....
     AR.setPlaneDetection(AR.PlaneDetectionTypes.Horizontal);
     AR.setPlaneDetection(AR.PlaneDetectionTypes.Vertical);
     this.renderer = new ExpoTHREE.Renderer({
       gl,
-      pixelRatio,
+      pixelRatio: scale,
       width,
       height
     });
@@ -75,6 +78,58 @@ export default class HomeScreen extends Component {
 
     this.renderer.render(this.scene, this.camera);
   }
+
+  // **** TOUCHABLEVIEW METHOD *****
+  // Called when `onPanResponderGrant` is invoked.
+  onTouchesBegan = async ({ locationX: x, locationY: y }) => {
+   if (!this.renderer) {
+      return;
+    }
+
+    // Get the size of the renderer
+    const size = this.renderer.getSize();
+    console.log(`Size: ${size}`);
+
+    // Invoke the native hit test method
+    const { hitTest } = await AR.performHitTest(
+      {
+        x: x / size.width,
+        y: y / size.height,
+      },
+      /* Result type from intersecting a horizontal
+        plane estimate, determined for the current frame.
+      */
+      AR.HitTestResultTypes.HorizontalPlane
+    );
+    console.log(`X: ${hitTest.x} Y: ${hitTest.y}`);
+    // Traverse the test results
+    for (let hit of hitTest) {
+      const { worldTransform } = hit;
+      this.onAddObjectPress();
+      console.log('Object added via hit-test');
+
+      // Disable the matrix auto updating system
+      this.threeModel.matrixAutoUpdate = false;
+
+      /*
+      Parse the matrix array: ex:
+        [
+          1,0,0,0,
+          0,1,0,0,
+          0,0,1,0,
+          0,0,0,1
+        ]
+      */
+      const matrix = new THREE.Matrix4();
+      matrix.fromArray(worldTransform);
+      //
+      // // Manually update the matrix
+      this.threeModel.applyMatrix(matrix);
+      this.threeModel.updateMatrix();
+    }
+  }
+
+  // ***************************
 
   onAddObjectPress = () => {
     // Remove the current object...
@@ -128,28 +183,28 @@ export default class HomeScreen extends Component {
           onResize={this.onResize}
         />
 
-      <View style={styles.stickyFloorView}>
-        <View style={styles.stickyFloorSubview}>
-          <Icon.Button
-            size={40}
-            name='plus'
-            backgroundColor='transparent'
-            onPress={this.onAddObjectPress}
-          />
-          <Icon.Button
-            size={40}
-            name='magnify'
-            backgroundColor='transparent'
-            onPress={this.onSearchModalPress}
-          />
-          <Icon.Button
-            size={40}
-            name='minus'
-            backgroundColor='transparent'
-            onPress={this.onRemoveObjectPress}
-          />
+        <View style={styles.stickyFloorView}>
+          <View style={styles.stickyFloorSubview}>
+            <Icon.Button
+              size={40}
+              name='plus'
+              backgroundColor='transparent'
+              onPress={this.onAddObjectPress}
+            />
+            <Icon.Button
+              size={40}
+              name='magnify'
+              backgroundColor='transparent'
+              onPress={this.onSearchModalPress}
+            />
+            <Icon.Button
+              size={40}
+              name='minus'
+              backgroundColor='transparent'
+              onPress={this.onRemoveObjectPress}
+            />
+          </View>
         </View>
-      </View>
 
         <Modal visible={this.state.searchModalVisible} animationType="slide">
           <SearchableGooglePolyAssetList

@@ -161,6 +161,13 @@ export default class CustomARObject extends Component {
     this.arPointLight.update();
   }
 
+  addDirectionalLight = () => {
+    // Add a light to give depth to the scene
+    const light = new THREE.DirectionalLight(0xffffff, 0.5);
+    light.position.set(1, 1, 1);
+    this.scene.add(light);
+  }
+
   // The normalized point on the screen that we want our object to stick to.
   screenCenter = new THREE.Vector2(0.5, 0.5);
 
