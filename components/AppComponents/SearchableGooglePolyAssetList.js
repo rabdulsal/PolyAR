@@ -48,7 +48,7 @@ export default class SearchableGooglePolyAssetList extends Component {
 
   renderSearchInput = () => {
     return (<TextInput
-      style={styles.textInputStyle}
+      style={styles.searchBarStyle}
       placeholder="Search..."
       autoCapitalize="none"
       value={this.state.searchQuery}
@@ -110,7 +110,7 @@ export default class SearchableGooglePolyAssetList extends Component {
 
   render() {
     return (
-      <ScrollView style={{ paddingTop: 20 }}>
+      <ScrollView style={{ paddingTop: 55 }}>
          {this.renderSearchInput()}
          <Button title="Search" onPress={this.onSearchPress} />
          {this.renderCurrentResults()}
@@ -125,10 +125,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  textInputStyle: {
+  searchBarStyle: {
     borderWidth: 1,
     height: 40,
     marginHorizontal: 10,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    borderRadius: 10,
   }
 });

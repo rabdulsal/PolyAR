@@ -52,20 +52,26 @@ export default class CustomARObject extends Component {
     this.scene.add(ambientLight);
 
     // ARPoint Light....
-    this.arPointLight = new ThreeAR.Light();
-    this.arPointLight.position.y = 2;
-    this.scene.add(this.arPointLight);
+    // this.addARPointLight();
 
-    this.shadowLight = this.getShadowLight();
-    this.scene.add(this.shadowLight);
-    this.scene.add(this.shadowLight.target);
+    // this.shadowLight = this.getLightAndShadow();
+    // this.scene.add(this.shadowLight);
+    // this.scene.add(this.shadowLight.target);
 
     // Dynamic Light....
+    // this.addDynamicLighting();
+
+    // Make a cube
+    // this.addMagneticCube();
+  }
+
+  addDynamicLighting = () => {
     const point = new ThreeAR.Light();
     point.position.y = 2;
     point.update();
+  }
 
-    // Texturing....
+  getCubeMatTexturing = async () => {
     const diffuseAsset = await AssetUtils.resolveAsync(
     'https://github.com/mrdoob/three.js/blob/master/examples/textures/brick_diffuse.jpg?raw=true'
     );
@@ -104,14 +110,18 @@ export default class CustomARObject extends Component {
       bumpMap,
       roughnessMap,
     });
+    return cubeMat;
+  }
 
-    // Make a cube
+  addMagneticCube = () => {
     const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-    this.cube = new THREE.Mesh(geometry, cubeMat);
+    this.cube = new THREE.Mesh(geometry, this.getCubeMatTexturing());
     this.cube.position.y = 0.05;
     this.cube.castShadow = true;
 
     this.magneticObject = new ThreeAR.MagneticObject();
+    // This will make the points get more rawDataPoints from Expo.AR
+    this.magneticObject.update(this.camera, this.screenCenter);
     this.magneticObject.maintainScale = false;
     this.magneticObject.maintainRotation = false;
 
@@ -126,7 +136,7 @@ export default class CustomARObject extends Component {
     this.scene.add(this.magneticObject);
   }
 
-  getShadowLight = () => {
+  getLightAndShadow = () => {
     // Shadow Light.....
     const light = new THREE.DirectionalLight(0xffffff, 0.6);
     light.castShadow = true;
@@ -144,6 +154,13 @@ export default class CustomARObject extends Component {
     return light;
   }
 
+  addARPointLight = () => {
+    this.arPointLight = new ThreeAR.Light();
+    this.arPointLight.position.y = 2;
+    this.scene.add(this.arPointLight);
+    this.arPointLight.update();
+  }
+
   // The normalized point on the screen that we want our object to stick to.
   screenCenter = new THREE.Vector2(0.5, 0.5);
 
@@ -159,12 +176,7 @@ export default class CustomARObject extends Component {
     this.renderer.setSize(width, height);
   };
 
-  onRender = () => {
-    // This will make the points get more rawDataPoints from Expo.AR
-    this.magneticObject.update(this.camera, this.screenCenter);
-
-    this.arPointLight.update();
-
+  getShadowLight = () => {
     this.shadowFloor.opacity = this.arPointLight.intensity;
 
     this.shadowLight.target.position.copy(this.magneticObject.position);
@@ -172,6 +184,11 @@ export default class CustomARObject extends Component {
     this.shadowLight.position.x += 0.1;
     this.shadowLight.position.y += 1;
     this.shadowLight.position.z += 0.1;
+  }
+
+  onRender = () => {
+
+    // this.getShadowLight();
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -189,8 +206,8 @@ export default class CustomARObject extends Component {
     return (
       <GraphicsView
         style={{ flex: 1 }}
-        onContextCreate={this.onContextCreate}
-        onRender={this.onRender}
+        onContextCreate={this.props.onContextCreate}
+        onRender={this.props.onRender}
         onResize={this.onResize}
         isArEnabled
         isArRunningStateEnabled

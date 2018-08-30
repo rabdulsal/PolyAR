@@ -9,8 +9,9 @@ import {
   Modal
 } from 'react-native';
 import Expo from 'expo';
-import ExpoTHREE, { THREE } from 'expo-three';
 import ExpoGraphics from 'expo-graphics';
+import { AR, Asset, Permissions } from 'expo';
+import ExpoTHREE, { AR as ThreeAR, THREE } from 'expo-three';
 import CustomARObject from '../components/AppComponents/CustomARObject';
 import GooglePoly from './../api/GooglePoly';
 import ApiKeys from './../constants/ApiKeys';
@@ -29,11 +30,36 @@ export default class HomeScreen extends Component {
     };
   }
 
+  onContextCreate = async ({ gl, scale: pixelRatio, width, height }) => {
+    // Initializer renderer....
+    AR.setPlaneDetection(AR.PlaneDetectionTypes.Horizontal);
+    AR.setPlaneDetection(AR.PlaneDetectionTypes.Vertical);
+    this.renderer = new ExpoTHREE.Renderer({
+      gl,
+      pixelRatio,
+      width,
+      height
+    });
+
+    // Initialize scene...
+    this.scene = new THREE.Scene();
+    this.scene.background = new ThreeAR.BackgroundTexture(this.renderer);
+
+    // Initialize camera
+    this.camera = new ThreeAR.Camera(width, height, 0.1, 1000);
+
+    // Initialize lighting…
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    this.scene.add(ambientLight);
+  }
+
   onRender = (delta) => {
-    if (this.turkey) {
-      this.turkey.rotation.x += 2 * delta;
-      this.turkey.rotation.y += 1.5 * delta;
+    if (this.threeModel) {
+      this.threeModel.rotation.x += 2 * delta;
+      this.threeModel.rotation.y += 1.5 * delta;
     }
+
+    this.renderer.render(this.scene, this.camera);
   }
 
   onAddObjectPress = () => {
@@ -47,7 +73,7 @@ export default class HomeScreen extends Component {
       object.position.z = -3;
       this.scene.add(object);
     }.bind(this), function (error) {
-      console.log(error);
+      console.log(`Error: ${error}`);
     });
   }
 
@@ -67,6 +93,7 @@ export default class HomeScreen extends Component {
     this.setState({
       currentAsset: asset
     });
+    console.log(`Asset set: ${asset.displayName}`);
     this.setState({
       searchModalVisible: false
     });
@@ -80,8 +107,12 @@ export default class HomeScreen extends Component {
 
   render() {
     return (
-      // <CustomARObject />
       <View style={{ flex: 1 }}>
+        <CustomARObject
+          onContextCreate={this.onContextCreate}
+          onRender={this.onRender}
+        />
+
         <Button title="Add Object" onPress={this.onAddObjectPress} />
         <Button title="Search" onPress={this.onSearchModalPress} />
 
