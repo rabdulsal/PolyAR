@@ -208,7 +208,7 @@ export default class CustomARObject extends Component {
         style={{ flex: 1 }}
         onContextCreate={this.props.onContextCreate}
         onRender={this.props.onRender}
-        onResize={this.onResize}
+        onResize={this.props.onResize}
         isArEnabled
         isArRunningStateEnabled
         isArCameraStateEnabled

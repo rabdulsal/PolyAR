@@ -12,11 +12,14 @@ import Expo from 'expo';
 import ExpoGraphics from 'expo-graphics';
 import { AR, Asset, Permissions } from 'expo';
 import ExpoTHREE, { AR as ThreeAR, THREE } from 'expo-three';
+import { MaterialCommunityIcons as Icon } from 'react-native-vector-icons';
 import CustomARObject from '../components/AppComponents/CustomARObject';
 import GooglePoly from './../api/GooglePoly';
 import ApiKeys from './../constants/ApiKeys';
 import { SearchableGooglePolyAssetList } from '../components/AppComponents';
 import TurkeyObject from './../assets/objects/TurkeyObject.json';
+
+console.disableYellowBox = true;
 
 export default class HomeScreen extends Component {
 
@@ -46,12 +49,23 @@ export default class HomeScreen extends Component {
     this.scene.background = new ThreeAR.BackgroundTexture(this.renderer);
 
     // Initialize camera
-    this.camera = new ThreeAR.Camera(width, height, 0.1, 1000);
+    this.camera = new ThreeAR.Camera(width, height, 0.01, 1000);
 
     // Initialize lighting…
     const ambientLight = new THREE.AmbientLight(0x404040);
     this.scene.add(ambientLight);
   }
+
+  onResize = ({ x, y, scale, width, height }) => {
+    // Let's stop the function if we haven't setup our scene yet
+    if (!this.renderer) {
+      return;
+    }
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setPixelRatio(scale);
+    this.renderer.setSize(width, height);
+  };
 
   onRender = (delta) => {
     if (this.threeModel) {
@@ -111,10 +125,31 @@ export default class HomeScreen extends Component {
         <CustomARObject
           onContextCreate={this.onContextCreate}
           onRender={this.onRender}
+          onResize={this.onResize}
         />
 
-        <Button title="Add Object" onPress={this.onAddObjectPress} />
-        <Button title="Search" onPress={this.onSearchModalPress} />
+      <View style={styles.stickyFloorView}>
+        <View style={styles.stickyFloorSubview}>
+          <Icon.Button
+            size={40}
+            name='plus'
+            backgroundColor='transparent'
+            onPress={this.onAddObjectPress}
+          />
+          <Icon.Button
+            size={40}
+            name='magnify'
+            backgroundColor='transparent'
+            onPress={this.onSearchModalPress}
+          />
+          <Icon.Button
+            size={40}
+            name='minus'
+            backgroundColor='transparent'
+            onPress={this.onRemoveObjectPress}
+          />
+        </View>
+      </View>
 
         <Modal visible={this.state.searchModalVisible} animationType="slide">
           <SearchableGooglePolyAssetList
@@ -135,5 +170,16 @@ const styles = {
     marginHorizontal: 10,
     borderRadius: 10,
     paddingHorizontal: 10
+  },
+  stickyFloorView: {
+    position: 'absolute',
+    bottom: 0,
+    flex: 1,
+    flexDirection: 'row'
+  },
+  stickyFloorSubview: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
 };

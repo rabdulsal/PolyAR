@@ -9,6 +9,7 @@ import {
   ScrollView,
   Button
 } from 'react-native';
+import { MaterialCommunityIcons as Icon } from 'react-native-vector-icons';
 import GooglePolyAsset from './GooglePolyAsset';
 
 export default class SearchableGooglePolyAssetList extends Component {
@@ -47,20 +48,41 @@ export default class SearchableGooglePolyAssetList extends Component {
   }
 
   renderSearchInput = () => {
-    return (<TextInput
-      style={styles.searchBarStyle}
-      placeholder="Search..."
-      autoCapitalize="none"
-      value={this.state.searchQuery}
-      onChangeText={this.onSearchChangeText}
-    />);
+    return (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginHorizontal: 10
+        }}
+      >
+        <View style={styles.searchContainer}>
+          <Icon
+            name='magnify'
+            color='#DDDDDD'
+            size={20}
+            style={{ paddingLeft: 10, paddingRight: 3 }}
+          />
+          <TextInput
+            style={styles.searchTextInput}
+            placeholder="Search..."
+            autoCapitalize="none"
+            value={this.state.searchQuery}
+            onChangeText={this.onSearchChangeText}
+            onSubmitEditing={this.onSearchPress}
+          />
+        </View>
+        <Button title='Cancel' onPress={this.props.onCancelPress} />
+      </View>
+    );
   }
 
   renderCurrentResults = () => {
     if (this.state.currentResults.length === 0) {
       return (
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text>No results</Text>
+          <Text style={styles.noResultsText}>No results</Text>
         </View>
       );
     }
@@ -110,7 +132,7 @@ export default class SearchableGooglePolyAssetList extends Component {
 
   render() {
     return (
-      <ScrollView style={{ paddingTop: 55 }}>
+      <ScrollView style={{ marginTop: 55 }}>
          {this.renderSearchInput()}
          <Button title="Search" onPress={this.onSearchPress} />
          {this.renderCurrentResults()}
@@ -125,11 +147,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  searchBarStyle: {
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    height: 40,
-    marginHorizontal: 10,
-    paddingHorizontal: 10,
+    borderColor: '#DDDDDD',
     borderRadius: 10,
+  },
+  searchTextInput: {
+    flex: 1,
+    height: 40
+  },
+  noResultsText: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    paddingTop: 50
   }
 });

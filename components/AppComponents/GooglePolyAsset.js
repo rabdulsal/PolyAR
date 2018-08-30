@@ -44,9 +44,12 @@ const styles = StyleSheet.create({
     borderRadius: 10
   },
   displayName: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    width: 150,
+    textAlign: 'center'
   },
   authorName: {
-
+    width: 150,
+    textAlign: 'center'
   }
 });

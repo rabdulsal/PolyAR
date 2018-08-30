@@ -21,6 +21,7 @@
     "expo-three": "^3.0.0-alpha.4",
     "react": "16.3.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-29.0.0.tar.gz",
+    "react-native-vector-icons": "^5.0.0",
     "react-navigation": "^2.9.3",
     "three": "^0.95.0",
     "three-mtl-loader": "^1.0.2",
