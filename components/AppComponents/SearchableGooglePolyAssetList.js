@@ -25,6 +25,7 @@ export default class SearchableGooglePolyAssetList extends Component {
     this.state = {
       searchQuery: '',
       currentResults: this.props.googlePoly.currentResults,
+      hasResults: this.props.googlePoly.currentResults.length !== 0
     };
   }
 
@@ -71,6 +72,7 @@ export default class SearchableGooglePolyAssetList extends Component {
             value={this.state.searchQuery}
             onChangeText={this.onSearchChangeText}
             onSubmitEditing={this.onSearchPress}
+            autoFocus={!this.state.hasResults}
           />
         </View>
         <Button title='Cancel' onPress={this.props.onCancelPress} />

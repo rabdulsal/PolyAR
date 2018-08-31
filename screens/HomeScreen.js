@@ -26,6 +26,9 @@ console.disableYellowBox = true;
 
 export default class HomeScreen extends Component {
 
+  static navigationOptions = {
+    header: null
+  }
   constructor(props) {
     super(props);
 
@@ -138,9 +141,9 @@ export default class HomeScreen extends Component {
     // Add the current object...
     GooglePoly.getThreeModel(this.state.currentAsset, function (object) {
       this.threeModel = object;
-      ExpoTHREE.utils.scaleLongestSideToSize(object, 0.75);
-      object.position.z = -3;
-      this.scene.add(object);
+      ExpoTHREE.utils.scaleLongestSideToSize(this.threeModel, 0.75);
+      this.threeModel.position.z = -3;
+      this.scene.add(this.threeModel);
     }.bind(this), function (error) {
       console.log(`Error: ${error}`);
     });
